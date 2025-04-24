@@ -41,6 +41,31 @@ app.get('/api/matters', async (req, res) => {
     }
 });
 
+// Add this to your existing server.js
+app.get('/api/matters-overview', async (req, res) => {
+    try {
+        const response = await axios.get(
+            `https://api.baserow.io/api/database/rows/table/${BASEROW_TABLE_ID}/?user_field_names=true`,
+            {
+                headers: {
+                    'Authorization': `Token ${BASEROW_TOKEN}`
+                }
+            }
+        );
+        
+        // Filter only "In Progress" matters for the overview page
+        const inProgressMatters = response.data.results.filter(matter => {
+            const status = matter.Status && (matter.Status.value || matter.Status);
+            return status === 'In Progress';
+        });
+        
+        res.json(inProgressMatters);
+    } catch (error) {
+        console.error('Error fetching matters overview:', error);
+        res.status(500).json({ error: 'Failed to fetch matters overview' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
