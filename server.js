@@ -7,6 +7,14 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// In server.js
+const corsOptions = {
+  origin: 'https://baserow.io',
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());
