@@ -22,6 +22,7 @@ app.use(express.json());
 // Environment variables
 const BASEROW_TABLE_ID = process.env.BASEROW_TABLE_ID;
 const BASEROW_TOKEN = process.env.BASEROW_TOKEN;
+const HISTORY_TABLE_ID = process.env.HISTORY_TABLE_ID;
 
 // Proxy endpoint for Baserow API
 app.get('/api/matters', async (req, res) => {
@@ -66,6 +67,43 @@ app.get('/api/matters-overview', async (req, res) => {
     }
 });
 
+// Add these endpoints to your existing server.js
+
+// Get specific matter details
+app.get('/api/matter/:id', async (req, res) => {
+    try {
+        const response = await axios.get(
+            `https://api.baserow.io/api/database/rows/table/${BASEROW_TABLE_ID}/${req.params.id}/?user_field_names=true`,
+            {
+                headers: {
+                    'Authorization': `Token ${BASEROW_TOKEN}`
+                }
+            }
+        );
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching matter details:', error);
+        res.status(500).json({ error: 'Failed to fetch matter details' });
+    }
+});
+
+// Get history logs for a matter
+app.get('/api/matter/:id/history', async (req, res) => {
+    try {
+        const response = await axios.get(
+            `https://api.baserow.io/api/database/rows/table/${HISTORY_TABLE_ID}/?user_field_names=true&filter__Matter__link_row_contains=${req.params.id}`,
+            {
+                headers: {
+                    'Authorization': `Token ${BASEROW_TOKEN}`
+                }
+            }
+        );
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching matter history:', error);
+        res.status(500).json({ error: 'Failed to fetch matter history' });
+    }
+});
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
